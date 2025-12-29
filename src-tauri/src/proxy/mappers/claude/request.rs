@@ -230,6 +230,7 @@ fn build_contents(
                         ContentBlock::Thinking { thinking, signature, .. } => {
                             let mut part = json!({
                                 "text": thinking,
+                                "thought": true,
                             });
                             // [New] 递归清理黑名单字段（如 cache_control）
                             crate::proxy::common::json_schema::clean_json_schema(&mut part);
