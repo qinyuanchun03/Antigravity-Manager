@@ -164,7 +164,7 @@ print(response.choices[0].message.content)
             - **Fixed Image Recognition**: Fully adapted Codex CLI's `input_image` block parsing and added support for `file://` local paths with automatic Base64 conversion.
             - **Gemini 400 Error Mitigation**: Implemented automatic merging of consecutive identical role messages, strictly following Gemini's role alternation requirements to eliminate related 400 errors.
             - **Protocol Stability Enhancements**: Optimized deep JSON Schema cleaning (including physical isolation for `cache_control`) and added context backfilling for `thoughtSignature`.
-            - **Linux Compatibility Fix**: Switched compilation environment to Ubuntu 20.04 (GLIBC 2.31) and reverted to WebKit2GTK 4.0 and libsoup 2.4, resolving startup failures on older Linux distributions due to GLIBC or library version mismatches.
+            - **Linux Build Strategy Adjustment**: Due to the severe scarcity of GitHub's Ubuntu 20.04 runners causing release hangups, official builds have reverted to the **Ubuntu 22.04** environment. Ubuntu 20.04 users are encouraged to clone the source for local builds or try running via AppImage.
     *   **v3.3.3 (2025-12-29)**:
         - **Account Management Enhancements**:
             - **Subscription Tier Identification**: Integrated automatic detection, labeling, and filtering for account subscription tiers (PRO/ULTRA/FREE).

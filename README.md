@@ -180,7 +180,7 @@ print(response.choices[0].message.content)
             - **修复图像识别**: 完美适配 Codex CLI 的 `input_image` 块解析，并支持 `file://` 本地路径自动转 Base64 上传。
             - **Gemini 400 错误治理**: 实现了连续相同角色消息的自动合并，严格遵循 Gemini 角色交替规范，彻底解决此类 400 报错。
             - **协议稳定性增强**: 优化了 JSON Schema 深度清理（新增对 `cache_control` 的物理隔离）及 `thoughtSignature` 的上下文回填逻辑。
-            - **Linux 兼容性修复**: 将编译环境切换至 Ubuntu 20.04 (GLIBC 2.31)，并切换至 WebKit2GTK 4.0 和 libsoup 2.4，解决了在旧版 Linux 系统上因 GLIBC 版本过高或库缺失导致的无法运行问题。
+            - **Linux 构建策略调整**: 由于 GitHub 的 Ubuntu 20.04 运行器资源极度匮乏导致发布挂起，官方版本现回归使用 **Ubuntu 22.04** 环境编译。Ubuntu 20.04 用户建议自行克隆源码完成本地构建，或使用 AppImage 尝试运行。
     *   **v3.3.3 (2025-12-29)**:
         - **账号管理增强**:
             - **订阅等级智能识别**: 新增对账号订阅等级（PRO/ULTRA/FREE）的自动识别、标识与筛选支持。
