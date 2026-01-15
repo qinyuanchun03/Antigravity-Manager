@@ -280,6 +280,8 @@ impl TokenManager {
         let threshold = config.threshold_percentage as i32;
 
 
+        let mut changed = false;
+
         for model in models {
             let name = model.get("name").and_then(|v| v.as_str()).unwrap_or("");
             if !config.monitored_models.iter().any(|m| m == name) {
@@ -291,7 +293,9 @@ impl TokenManager {
 
             if percentage <= threshold {
                 // 触发保护 (Issue #621 改为模型级)
-                let _ = self.trigger_quota_protection(account_id, account_path, percentage, threshold, name).await;
+                if self.trigger_quota_protection(account_json, &account_id, account_path, percentage, threshold, name).await.unwrap_or(false) {
+                    changed = true;
+                }
             } else {
                 // 尝试恢复 (如果之前受限)
                 let protected_models = account_json.get("protected_models").and_then(|v| v.as_array());
@@ -300,10 +304,14 @@ impl TokenManager {
                 });
 
                 if is_protected {
-                    let _ = self.restore_quota_protection(account_json, &account_id, account_path, name).await;
+                    if self.restore_quota_protection(account_json, &account_id, account_path, name).await.unwrap_or(false) {
+                        changed = true;
+                    }
                 }
             }
         }
+        
+        let _ = changed; // 避免 unused 警告，如果后续逻辑需要可以继续使用
         
         // 我们不再因为配额原因返回 true（即不再跳过账号），
         // 而是加载并在 get_token 时进行过滤。
