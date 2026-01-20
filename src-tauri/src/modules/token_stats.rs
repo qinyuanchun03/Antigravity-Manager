@@ -54,11 +54,17 @@ pub struct ModelTokenStats {
     pub request_count: u64,
 }
 
-/// Model trend data point (for stacked area chart)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelTrendPoint {
     pub period: String,
     pub model_data: std::collections::HashMap<String, u64>,
+}
+
+/// Account trend data point (for stacked area chart)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountTrendPoint {
+    pub period: String,
+    pub account_data: std::collections::HashMap<String, u64>,
 }
 
 fn get_db_path() -> Result<PathBuf, String> {
@@ -494,6 +500,86 @@ pub fn get_model_trend_daily(days: i64) -> Result<Vec<ModelTrendPoint>, String> 
     Ok(trend_map
         .into_iter()
         .map(|(period, model_data)| ModelTrendPoint { period, model_data })
+        .collect())
+}
+
+pub fn get_account_trend_hourly(hours: i64) -> Result<Vec<AccountTrendPoint>, String> {
+    let conn = connect_db()?;
+    let cutoff = chrono::Utc::now().timestamp() - (hours * 3600);
+
+    let mut stmt = conn
+        .prepare(
+            "SELECT strftime('%Y-%m-%d %H:00', datetime(timestamp, 'unixepoch')) as hour_bucket,
+                account_email,
+                SUM(total_tokens) as total
+         FROM token_usage
+         WHERE timestamp >= ?1
+         GROUP BY hour_bucket, account_email
+         ORDER BY hour_bucket ASC",
+        )
+        .map_err(|e| e.to_string())?;
+
+    let mut trend_map: std::collections::BTreeMap<String, std::collections::HashMap<String, u64>> =
+        std::collections::BTreeMap::new();
+
+    let rows = stmt
+        .query_map([cutoff], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, u64>(2)?,
+            ))
+        })
+        .map_err(|e| e.to_string())?;
+
+    for row in rows {
+        let (period, account, total) = row.map_err(|e| e.to_string())?;
+        trend_map.entry(period).or_default().insert(account, total);
+    }
+
+    Ok(trend_map
+        .into_iter()
+        .map(|(period, account_data)| AccountTrendPoint { period, account_data })
+        .collect())
+}
+
+pub fn get_account_trend_daily(days: i64) -> Result<Vec<AccountTrendPoint>, String> {
+    let conn = connect_db()?;
+    let cutoff = chrono::Utc::now().timestamp() - (days * 24 * 3600);
+
+    let mut stmt = conn
+        .prepare(
+            "SELECT strftime('%Y-%m-%d', datetime(timestamp, 'unixepoch')) as day_bucket,
+                account_email,
+                SUM(total_tokens) as total
+         FROM token_usage
+         WHERE timestamp >= ?1
+         GROUP BY day_bucket, account_email
+         ORDER BY day_bucket ASC",
+        )
+        .map_err(|e| e.to_string())?;
+
+    let mut trend_map: std::collections::BTreeMap<String, std::collections::HashMap<String, u64>> =
+        std::collections::BTreeMap::new();
+
+    let rows = stmt
+        .query_map([cutoff], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, u64>(2)?,
+            ))
+        })
+        .map_err(|e| e.to_string())?;
+
+    for row in rows {
+        let (period, account, total) = row.map_err(|e| e.to_string())?;
+        trend_map.entry(period).or_default().insert(account, total);
+    }
+
+    Ok(trend_map
+        .into_iter()
+        .map(|(period, account_data)| AccountTrendPoint { period, account_data })
         .collect())
 }
 

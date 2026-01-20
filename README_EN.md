@@ -212,6 +212,12 @@ print(response.choices[0].message.content)
 
 *   **Changelog**:
     *   **v3.3.46 (2026-01-20)**:
+        -   **[Enhancement] Deep Optimization & i18n Standardization for Token Stats (PR #892)**:
+            -   **Unified UI/UX**: Implemented custom Tooltip components to unify hover styles across Area, Bar, and Pie charts, enhancing contrast and readability in Dark Mode.
+            -   **Visual Refinements**: Optimized chart cursors and grid lines, removing redundant hover overlays for a cleaner, more professional interface.
+            -   **Adaptive Layout**: Improved Flexbox layout for chart containers, ensuring they fill available vertical space across various window sizes and eliminating empty gaps.
+            -   **Per-Account Trend Statistics**: Added a "By Account" view mode, enabling intuitive analysis of token consumption shares and activity levels via pie and trend charts.
+            -   **i18n Standardization**: Completely resolved duplicate key warnings in `ja.json`, `zh-TW.json`, `vi.json`, `ru.json`, and `tr.json`. Added missing translations for `account_trend`, `by_model`, etc., ensuring consistent UI presentation across all 8 supported languages.
         -   **[Core Fix] Remove [DONE] from Stop Sequences to Prevent Truncation (PR #889)**:
             -   **Background**: `[DONE]` is a standard SSE (Server-Sent Events) protocol end signal that frequently appears in code and documentation. Including it as a `stopSequence` caused unexpected output truncation when the model explained SSE-related content.
             -   **Fix Details**: Removed the `"[DONE]"` marker from the Gemini request's `stopSequences` array.
